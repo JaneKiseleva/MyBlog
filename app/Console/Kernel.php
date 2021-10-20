@@ -24,7 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('posts:map')->dailyAt('01:30');
+        $schedule->command('posts:rss')->everySixHours();
     }
 
     /**

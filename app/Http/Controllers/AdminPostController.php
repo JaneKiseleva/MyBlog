@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PostEvent;
 use App\Models\Post;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -22,17 +23,16 @@ class AdminPostController extends Controller
 
     public function store()
     {
+        $imagePath = request()->file('thumbnail');
 
-        $imagePath = request()->file('thumbnail')->store('thumbnails', 'public');
-        $image = explode('/', $imagePath);
-        $imageName = end($image);
-
-        Post::create(array_merge($this->validatePost(), [
-            'user_id' => request()->user()->id,
-            'thumbnail' => $imageName
-        ]));
-
-        return redirect('/');
+        if ($imagePath !== null) {
+            $imagePath = $imagePath->store('thumbnails', 'public');
+        }
+            Post::create(array_merge($this->validatePost(), [
+                'user_id' => request()->user()->id,
+                'thumbnail' => $imagePath
+            ]));
+        return redirect('/')->with('success', 'Post Create!');
     }
 
     public function edit(Post $post)
@@ -44,20 +44,20 @@ class AdminPostController extends Controller
     {
         $attributes = $this->validatePost($post);
 
-        $imagePath = request()->file('thumbnail')->store('thumbnails', 'public');
-        $image = explode('/', $imagePath);
-        $imageName = end($image);
-
         if ($attributes['thumbnail'] ?? false) {
-            $attributes['thumbnail'] = $imageName;
+            $attributes['thumbnail'] = request()->file('thumbnail')->store('thumbnails', 'public');
         }
         $post->update($attributes);
+
+        event(new PostEvent($post));
         return back()->with('success', 'Post Updated!');
     }
 
     public function destroy(Post $post)
     {
         $post->delete();
+
+        event(new PostEvent($post));
         return back()->with('success', 'Post Deleted!');
     }
 
@@ -70,7 +70,8 @@ class AdminPostController extends Controller
         $post ??= new Post();
         $validator = Validator::make(request()->all(), [
             'title' => 'required',
-            'thumbnail' => $post->exists ? ['image'] : ['required', 'image'],
+            'thumbnail' => 'required|image',
+//            'thumbnail' => $post->exists ? ['image'] : ['required', 'image'],
             'slug' => ['required', Rule::unique('posts', 'slug')->ignore($post)],
             'excerpt' => 'required',
             'body' => 'required',

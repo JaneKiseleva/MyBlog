@@ -11,6 +11,10 @@ class Post extends Model
     use HasFactory;
 
     protected $with = ['category', 'author'];
+    /**
+     * @var mixed
+     */
+    private $user_id;
 
     public function scopeFilter($query, array $filters)
     {
@@ -43,4 +47,26 @@ class Post extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function setThumbnailAttribute($imagePath)
+    {
+        if ($imagePath == null) {
+            return $this->attributes['thumbnail'] = null;
+        }
+        $image = explode('/', $imagePath);
+        return $this->attributes['thumbnail'] = end($image);
+    }
+
+    public function getThumbnailPathAttribute()
+    {
+        $fullImagePath = '/storage/thumbnails/';
+        $imageDefault = 'image-default.jpg';
+
+        if ($this->thumbnail === null) {
+            return $fullImagePath.$imageDefault;
+        }
+        return $fullImagePath.$this->thumbnail;
+    }
+
 }
+

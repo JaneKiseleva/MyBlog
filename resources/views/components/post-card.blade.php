@@ -5,7 +5,7 @@
     hover:border-opacity-5 rounded-xl']) }}>
     <div class="py-6 px-5">
         <div>
-            <img src="{{ asset('/storage/thumbnails/'. $post->thumbnail) }}" alt="blog post illustration" class="rounded-xl">
+            <img src="{{ asset($post->thumbnailPath) }}" alt="blog post illustration" class="rounded-xl">
         </div>
 
         <div class="mt-8 flex flex-col justify-between">

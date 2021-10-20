@@ -20,15 +20,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::get('test', function () {
-//    $test[] = phpinfo();
-//    return $test;
-//});
-
-//Route::get('test', function () {
-//    return view('welcome');
-//});
-
 Route::get('/', [PostController::class, 'index'])->name('home');
 
 Route::get('posts/{post:slug}', [PostController::class, 'show']);
@@ -48,3 +39,5 @@ Route::post('logout', [SessionsController::class, 'destroy'])->middleware('auth'
 Route::middleware('can:admin')->group(function () {
     Route::resource('admin/posts', AdminPostController::class)->except('show');
 });
+
+
